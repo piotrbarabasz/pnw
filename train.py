@@ -188,14 +188,14 @@ cv_LP_SVC_lin = Pipeline([
 
 CLASSIFIERS = [
     tfidf_BR_MNB,
-    tfidf_BR_LR,
-    # tfidf_CC_MNB,
+    # tfidf_BR_LR,
+    tfidf_CC_MNB,
     # tfidf_CC_LR,
-    # tfidf_LB_MNB,
+    tfidf_LB_MNB,
     # tfidf_LB_LR,
     # cv_BR_MNB,
     # cv_BR_LR,
-    # cv_CC_MNB,
+    cv_CC_MNB,
     # cv_CC_LR,
     # cv_LP_MNB,
     # cv_LP_LR,
@@ -204,55 +204,48 @@ CLASSIFIERS = [
 
 CLASSIFIERS_NAMES = [
     'tfidf_BR_MNB',
-    'tfidf_BR_LR',
-    # 'tfidf_CC_MNB',
+    # 'tfidf_BR_LR',
+    'tfidf_CC_MNB',
     # 'tfidf_CC_LR',
-    # 'tfidf_LB_MNB',
+    'tfidf_LB_MNB',
     # 'tfidf_LB_LR',
     # 'cv_BR_MNB',
     # 'cv_BR_LR',
-    # 'cv_CC_MNB',
+    'cv_CC_MNB',
     # 'cv_CC_LR',
     # 'cv_LP_MNB',
     # 'cv_LP_LR',
     # 'cv_LP_SVC_lin'
 ]
 
-# scores = np.zeros(shape=(len(DATASETS), len(CLASSIFIERS), rskf.get_n_splits()))
-
 kf = KFold(n_splits=5, random_state=2137, shuffle=True)
 scores = np.zeros(shape=(len(CLASSIFIERS), kf.get_n_splits()))
+print(scores.shape)
+exit()
 
 X = train.loc[:, "text"]
 y = train.loc[:, all_tags]
-# dataset_index = 1
+split_index = 1
 
-for train_index, test_index in kf.split(X):
-    X_train, X_test = X.iloc[train_index], X.iloc[test_index]
-    y_train, y_test = y.iloc[train_index], y.iloc[test_index]
+for classifier_idx, clf_prot in enumerate(CLASSIFIERS):
 
-    for classifier_idx, clf_prot in enumerate(CLASSIFIERS):
+    for train_index, test_index in kf.split(X):
+        if split_index == 6:
+            split_index = 1
+
+        X_train, X_test = X.iloc[train_index], X.iloc[test_index]
+        y_train, y_test = y.iloc[train_index], y.iloc[test_index]
+
         clf = clone(clf_prot)
         time_start = time.time()
         clf.fit(X_train, y_train)
         time_end = time.time()
         predictions = clf.predict(X_test)
 
-        # print(CLASSIFIERS_NAMES[classifier_idx], ' split:', dataset_index)
+        print('\n' + CLASSIFIERS_NAMES[classifier_idx], ' split:', split_index)
         print('Accuracy = ', accuracy_score(y_test, predictions))
         print('F1 score is ', f1_score(y_test, predictions, average="micro"))
         print('Hamming Loss is ', hamming_loss(y_test, predictions))
         print('Time taken to fit model = ', str(time_end - time_start))
-        # dataset_index += 1
 
-        # score = accuracy_score(y_test, predictions)
-        # scores[train_index, test_index, classifier_idx] = score
-        # print(score)
-        # exit()
-        # scores[dataset_idx, classifier_idx, fold_idx] = score
-
-        # # Save the trained pipeline to a file
-        # filename = f'{clf.named_steps["clf"].__class__.__name__}_{label}.pklz'
-        # joblib.dump(clf, filename)
-
-# np.save("scores", scores)
+        split_index += 1
