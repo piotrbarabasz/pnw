@@ -187,15 +187,15 @@ cv_LP_SVC_lin = Pipeline([
 ])
 
 CLASSIFIERS = [
-    tfidf_BR_MNB,
+    tfidf_BR_MNB,   # fast
     # tfidf_BR_LR,
-    tfidf_CC_MNB,
+    tfidf_CC_MNB,   # fast
     # tfidf_CC_LR,
-    tfidf_LB_MNB,
+    tfidf_LB_MNB,   # fastest
     # tfidf_LB_LR,
     # cv_BR_MNB,
     # cv_BR_LR,
-    cv_CC_MNB,
+    cv_CC_MNB,  # fast
     # cv_CC_LR,
     # cv_LP_MNB,
     # cv_LP_LR,
@@ -203,15 +203,15 @@ CLASSIFIERS = [
 ]
 
 CLASSIFIERS_NAMES = [
-    'tfidf_BR_MNB',
+    'tfidf_BR_MNB',   # fast
     # 'tfidf_BR_LR',
-    'tfidf_CC_MNB',
+    'tfidf_CC_MNB',   # fast
     # 'tfidf_CC_LR',
-    'tfidf_LB_MNB',
+    'tfidf_LB_MNB',   # fastest
     # 'tfidf_LB_LR',
     # 'cv_BR_MNB',
     # 'cv_BR_LR',
-    'cv_CC_MNB',
+    'cv_CC_MNB',  # fast
     # 'cv_CC_LR',
     # 'cv_LP_MNB',
     # 'cv_LP_LR',
@@ -219,19 +219,17 @@ CLASSIFIERS_NAMES = [
 ]
 
 kf = KFold(n_splits=5, random_state=2137, shuffle=True)
-# scores = np.zeros(shape=(len(CLASSIFIERS), kf.get_n_splits()))
-# print(scores.shape)
+scores = np.zeros(shape=(len(CLASSIFIERS), kf.get_n_splits()))
 # exit()
 
 X = train.loc[:, "text"]
 y = train.loc[:, all_tags]
-split_index = 1
+split_idx = 0
 
 for classifier_idx, clf_prot in enumerate(CLASSIFIERS):
-
     for train_index, test_index in kf.split(X):
-        if split_index == 6:
-            split_index = 1
+        if split_idx == 5:
+            split_idx = 0
 
         X_train, X_test = X.iloc[train_index], X.iloc[test_index]
         y_train, y_test = y.iloc[train_index], y.iloc[test_index]
@@ -242,10 +240,16 @@ for classifier_idx, clf_prot in enumerate(CLASSIFIERS):
         time_end = time.time()
         predictions = clf.predict(X_test)
 
-        print('\n' + CLASSIFIERS_NAMES[classifier_idx], ' split:', split_index)
+        print('\n' + CLASSIFIERS_NAMES[classifier_idx], ' split:', split_idx + 1)
         print('Accuracy = ', accuracy_score(y_test, predictions))
         print('F1 score is ', f1_score(y_test, predictions, average="micro"))
         print('Hamming Loss is ', hamming_loss(y_test, predictions))
         print('Time taken to fit model = ', str(time_end - time_start))
 
-        split_index += 1
+        score = accuracy_score(y_test, predictions)
+        scores[classifier_idx, split_idx] = score
+
+        split_idx += 1
+
+print(scores.shape)
+np.save("scores", scores)
