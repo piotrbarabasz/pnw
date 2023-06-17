@@ -219,9 +219,9 @@ CLASSIFIERS_NAMES = [
 ]
 
 kf = KFold(n_splits=5, random_state=2137, shuffle=True)
-scores = np.zeros(shape=(len(CLASSIFIERS), kf.get_n_splits()))
-print(scores.shape)
-exit()
+# scores = np.zeros(shape=(len(CLASSIFIERS), kf.get_n_splits()))
+# print(scores.shape)
+# exit()
 
 X = train.loc[:, "text"]
 y = train.loc[:, all_tags]
