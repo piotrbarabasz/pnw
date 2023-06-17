@@ -225,28 +225,25 @@ scores = np.zeros(shape=(len(CLASSIFIERS), kf.get_n_splits()))
 
 X = train.loc[:, "text"]
 y = train.loc[:, all_tags]
-dataset_index = 1
+# dataset_index = 1
 
 for train_index, test_index in kf.split(X):
-
     X_train, X_test = X.iloc[train_index], X.iloc[test_index]
     y_train, y_test = y.iloc[train_index], y.iloc[test_index]
-    dataset_index = 1
 
     for classifier_idx, clf_prot in enumerate(CLASSIFIERS):
-
         clf = clone(clf_prot)
         time_start = time.time()
         clf.fit(X_train, y_train)
         time_end = time.time()
         predictions = clf.predict(X_test)
 
-        print(CLASSIFIERS_NAMES[classifier_idx], ' split:', dataset_index)
+        # print(CLASSIFIERS_NAMES[classifier_idx], ' split:', dataset_index)
         print('Accuracy = ', accuracy_score(y_test, predictions))
         print('F1 score is ', f1_score(y_test, predictions, average="micro"))
         print('Hamming Loss is ', hamming_loss(y_test, predictions))
         print('Time taken to fit model = ', str(time_end - time_start))
-        dataset_index += 1
+        # dataset_index += 1
 
         # score = accuracy_score(y_test, predictions)
         # scores[train_index, test_index, classifier_idx] = score
