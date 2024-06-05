@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "pnw"
+version = "0.1.0"
+description = ""
+authors = ["Piotr Barabasz <barabasz.piotrek@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+numpy = "^1.26.4"
+pandas = "^2.2.2"
+seaborn = "^0.13.2"
+matplotlib = "^3.9.0"
+nltk = "^3.8.1"
+scikit-learn = "^1.5.0"
+joblib = "^1.4.2"
+transformers = "^4.41.1"
+torch = "^2.3.0"
+accelerate = "^0.30.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
