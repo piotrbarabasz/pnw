@@ -11,6 +11,7 @@ import time
 from transformers import BertTokenizer, BertForSequenceClassification, TrainingArguments, Trainer
 from datasets import Dataset
 import torch
+import morfeusz2
 
 # Download stopwords
 nltk.download('stopwords')
@@ -38,21 +39,45 @@ def keepAlpha(sentence):
         alpha_sent += alpha_word + " "
     return alpha_sent.strip()
 
-stop_words = set(stopwords.words('english'))
-stop_words.update(['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'may', 'also', 'across', 'among', 'beside', 'however', 'yet', 'within'])
-re_stop_words = re.compile(r"\b(" + "|".join(stop_words) + ")\\W", re.I)
+# stop_words = set(stopwords.words('english'))
+# stop_words = set(stopwords.words('polish'))
+# stop_words.update(['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'may', 'also', 'across', 'among', 'beside', 'however', 'yet', 'within'])
+polish_stopwords = [
+    'i', 'oraz', 'ale', 'a', 'z', 'w', 'na', 'do', 'od', 'za', 'przy', 'o', 'u', 'pod', 'nad',
+    'po', 'przed', 'bez', 'dla', 'czy', 'że', 'to', 'jest', 'być', 'był', 'była', 'było', 'są',
+    'się', 'sam', 'tak', 'nie', 'już', 'tylko', 'więc', 'kiedy', 'który', 'która', 'które',
+    'ten', 'tamten', 'ta', 'te', 'ci', 'co', 'czyli', 'bardziej', 'mniej', 'tutaj', 'stąd',
+    'wszędzie', 'gdzie', 'ktokolwiek', 'nikt', 'każdy', 'wszystko', 'nic', 'można', 'muszę',
+    'musisz', 'chcę', 'chcesz', 'możesz', 'może', 'być', 'czemu', 'dlaczego', 'ponieważ', 'lecz',
+    'zero', 'jeden', 'dwa', 'trzy', 'cztery', 'pięć', 'sześć', 'siedem', 'osiem', 'dziewięć', 'dziesięć',
+    'może', 'także', 'przez', 'między', 'obok', 'jednak', 'jeszcze', 'w środku'
+]
+# stop_words.update(polish_additional_stopwords)
+re_stop_words = re.compile(r"\b(" + "|".join(polish_stopwords) + ")\\W", re.I)
 
 def removeStopWords(sentence):
     return re_stop_words.sub(" ", sentence)
 
-stemmer = SnowballStemmer("english")
+# stemmer = SnowballStemmer("polish")
+morf = morfeusz2.Morfeusz()
 
 def stemming(sentence):
     stemSentence = ""
     for word in sentence.split():
-        stem = stemmer.stem(word)
-        stemSentence += stem + " "
+        analysis = morf.analyse(word)
+        if analysis:
+            # The base form of the word is the first element in the first tuple
+            stem = analysis[0][2][1].split(':')[0]
+            stemSentence += stem + " "
+        else:
+            stemSentence += word + " "
     return stemSentence.strip()
+# def stemming(sentence):
+#     stemSentence = ""
+#     for word in sentence.split():
+#         stem = stemmer.stem(word)
+#         stemSentence += stem + " "
+#     return stemSentence.strip()
 
 # Apply text cleaning
 train["text"] = train["text"].str.lower()
@@ -131,4 +156,4 @@ trainer = Trainer(
 trainer.train()
 
 # Save the trained model
-trainer.save_model('trained_llm_model')
+trainer.save_model('trained_llm_model_pl')
