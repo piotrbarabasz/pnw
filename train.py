@@ -64,7 +64,7 @@ from torch.nn import BCEWithLogitsLoss
 train = pd.read_csv("train.csv")
 train.head()
 
-# print("Train datafram row count: {:d}".format(len(train)))
+# print("Train dataframe row count: {:d}".format(len(train)))
 
 all_tags = ['Computer Science', 'Physics', 'Mathematics', 'Statistics', 'Quantitative Biology', 'Quantitative Finance']
 train['Sum'] = train[all_tags].sum(axis=1)
